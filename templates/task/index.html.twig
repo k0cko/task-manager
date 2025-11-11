@@ -3,18 +3,30 @@
 {% block title %}Hello TaskController!{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {{ form(form) }}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/home/k0cko/dev/projects/task-manager/src/Controller/TaskController.php</code></li>
-        <li>Your template at <code>/home/k0cko/dev/projects/task-manager/templates/task/index.html.twig</code></li>
-    </ul>
-</div>
+
+    {% if tasks is not empty %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Description</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.getTitle }}</td>
+                        <td>{{ task.getDescription }}</td>
+                        <td>{{ task.getDueDate() is empty ? "" : task.getDueDate()|date('Y-m-d') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
 {% endblock %}
