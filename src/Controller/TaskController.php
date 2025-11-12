@@ -15,35 +15,79 @@ final class TaskController extends AbstractController
 {
     #[Route('/', name: 'app_task')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
+    public function index(): Response
     {
-        $currentUser = $this->getUser();
+        return $this->render('task/index.html.twig', [
+            'controller_name' => 'TaskController',
+            'tasks' => $this->getUser()->getTasks(),
+        ]);
+    }
 
-        $form = $this->createForm(TaskType::class, new Task());
+    #[Route('/create', name: 'app_task_create')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function create(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(TaskType::class, new Task(), [
+            'submit_button_label' => 'Create Task'
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $task = $form->getData();
 
-            $task->setOwner($currentUser);
+            $task->setOwner($this->getUser());
 
             $task->setCreatedAt(new \DateTimeImmutable('now'));
             $task->setUpdatedAt(new \DateTimeImmutable('now'));
 
             $entityManager->persist($task);
             $entityManager->flush();
-        }
 
-        return $this->render('task/index.html.twig', [
+            return $this->redirectToRoute('app_task');
+        }
+        
+        return $this->render('task/form.html.twig', [
             'controller_name' => 'TaskController',
             'form' => $form,
-            'tasks' => $currentUser->getTasks(),
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'app_task_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function edit(Request $request, EntityManagerInterface $entityManager, string $id): Response
+    {
+        $task = $entityManager->getRepository(Task::class)->find($id);
+
+        if ($task->getOwner() !== $this->getUser()) {
+            throw $this->createAccessDeniedException(
+                'You are trying to delete a task for a different user'
+            );
+        }
+
+        $form = $this->createForm(TaskType::class, $task, [
+            'submit_button_label' => 'Edit Task'
+        ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $task->setUpdatedAt(new \DateTimeImmutable('now'));
+            
+            $entityManager->persist($task);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_task');
+        }
+
+        return $this->render('task/form.html.twig', [
+            'controller_name' => 'TaskController',
+            'form' => $form,
         ]);
     }
 
     #[Route('/{id}/delete', name: 'app_task_delete', methods: ['GET'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function delete(EntityManagerInterface $entityManager, string $id): Response {
+    public function delete(EntityManagerInterface $entityManager, string $id): Response
+    {
         $task = $entityManager->getRepository(Task::class)->find($id);
         
         if (!$task) {

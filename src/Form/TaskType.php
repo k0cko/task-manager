@@ -16,11 +16,11 @@ class TaskType extends AbstractType
         $builder
             ->add('title')
             ->add('description')
-            ->add('dueDate', DateType::class, [    
-                'widget' => 'single_text',
+            ->add('dueDate', DateType::class, [
+                'required' => false
             ])
             ->add('save', SubmitType::class, [
-                'label' => 'Create Task'
+                'label' => $options['submit_button_label']
             ])
         ;
     }
@@ -29,6 +29,7 @@ class TaskType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Task::class,
+            'submit_button_label' => ""
         ]);
     }
 }

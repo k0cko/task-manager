@@ -1,16 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello TaskController!{% endblock %}
-
 {% block body %}
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <div style="padding-bottom: 10px;">
             <a href="{{ path('app_logout') }}">Log out</a>
         </div>
+
+        <div style="padding-bottom: 10px;">
+            <a href="{{ path('app_task_create') }}">New task</a>
+        </div>
     {% endif %}
-
-    {{ form(form) }}
-
 
     {% if tasks is not empty %}
         <table>
@@ -30,11 +29,16 @@
                         <td>{{ task.getDueDate() is empty ? "" : task.getDueDate()|date('Y-m-d') }}</td>
                         <td>
                             <a href="{{ path('app_task_delete', parameters: {id: task.id}) }}">Delete</a>
+                            <a href="{{ path('app_task_edit', parameters: {id: task.id}) }}">Edit</a>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+    {% else %}
+
+        <p>You don't have any tasks.</p>
+
     {% endif %}
 
 {% endblock %}
