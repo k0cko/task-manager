@@ -11,12 +11,6 @@
         {% endblock %}
     </head>
     <body>
-        {% if currentUser %}
-            <div style="padding-bottom: 10px;">
-                <a href="{{ path('app_logout') }}">Log out</a>
-            </div>
-        {% endif %}
-        
         {% block body %}{% endblock %}
     </body>
 </html>
